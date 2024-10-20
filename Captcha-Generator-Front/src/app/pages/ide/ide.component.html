@@ -1,21 +1,31 @@
-<div class="textarea-wrapper">
-  <div class="line-numbers" #lineNumbersRef [innerHTML]="lineNumbers"></div>
-  <div class="form-floating">
-    <textarea
-      class="form-control"
-      placeholder="Leave a comment here"
-      id="floatingTextarea2"
-      [(ngModel)]="textValue"
-      (input)="updateLineNumbers()"
-      (scroll)="syncScroll($event)"
-      (keyup)="updateCursorPosition($event)"
-      (click)="updateCursorPosition($event)"
-      style="height: 300px"
-    ></textarea>
-    <label for="floatingTextarea2">Code CC</label>
+<div class="container">
+  <div class="textarea-wrapper">
+    <div class="line-numbers" #lineNumbersRef [innerHTML]="lineNumbers"></div>
+    <div class="form-floating">
+      <textarea
+        class="form-control"
+        placeholder="Leave a comment here"
+        id="floatingTextarea2"
+        [(ngModel)]="textValue"
+        (input)="updateLineNumbers()"
+        (scroll)="syncScroll($event)"
+        (keyup)="updateCursorPosition($event)"
+        (click)="updateCursorPosition($event)"
+        style="height: 300px"
+      ></textarea>
+      <label for="floatingTextarea2">Code CLC</label>
+    </div>
+  </div>
+  <div class="cursor-position">
+    Línea: {{ cursorLine }}, Columna: {{ cursorColumn }}
+  </div>
+  <div class="file-buttons">
+    <input type="file" accept=".cc" (change)="loadFile($event)" id="fileInput" hidden>
+    <button type="button" class="btn btn-primary" (click)="triggerFileInput()">Upload File</button>
+    <button type="button" class="btn btn-secondary" (click)="saveFile()">Save File</button>
+    <button type="button" class="btn btn-success" (click)="generate()">Generate</button>
+    <button type="button" class="btn btn-danger" (click)="clearText()">Clean</button>
   </div>
 </div>
-<div class="cursor-position">
-  Línea: {{ cursorLine }}, Columna: {{ cursorColumn }}
+<div class="footer-dark">
 </div>
-
