@@ -11,6 +11,9 @@ export class IdeComponent implements OnInit {
   lineNumbers: string = '0';
   cursorLine: number = 1;
   cursorColumn: number = 1;
+  consoleOutput: string='';
+  errores: any[] = [];
+  variables: any[] = [];
 
   @ViewChild('lineNumbersRef') lineNumbersRef!: ElementRef;
   constructor(private connectionService: ConnectionService) {}
@@ -72,14 +75,40 @@ export class IdeComponent implements OnInit {
     this.cursorColumn = 1;
     this.updateLineNumbers();
   }
+  //Metodo para analizar el contenido del IDE
   generate(): void { 
     this.connectionService.processCode(this.textValue).subscribe(
       (response) => {
+        if (response.errores && response.errores.length > 0) {
+          
+          this.errores = response.errores;
+          this.consoleOutput = this.errores.map(error => 
+            `Tipo de error: ${error.tipoError}\n` +
+            `Descripción: ${error.descripcion}\n` +
+            `Línea: ${error.linea}, Columna: ${error.columna}\n` +
+            `Solución: ${error.solucion}\n`
+          ).join('\n--------------------\n');
+        } else {
+          
+          this.variables = response.vars ?? [];
+          this.errores = [];
+  
+         
+          if (this.variables.length > 0) {
+           // this.consoleOutput = 'Variables analizadas:\n' + 
+             //                    this.variables.map(variable => 
+               //                    `ID: ${variable.id}, Tipo: ${variable.tipo}, Modo: ${variable.mode}`
+                 //                ).join('\n');
+              this.consoleOutput = 'Captcha creado exitosamente';
+          } 
+        }
         console.log('Respuesta del backend: ', response);
       },
       (error) => {
         console.error('Error al procesar el código: ', error);
+        this.consoleOutput = 'Error al procesar el código.';
       }
     );
   }
+  
 }

@@ -27,5 +27,15 @@
     <button type="button" class="btn btn-danger" (click)="clearText()">Clean</button>
   </div>
 </div>
-<div class="footer-dark">
+
+<!-- TextArea para la consola de salida -->
+<div class="console-output-wrapper">
+  <textarea
+    class="console-output"
+    [value]="consoleOutput"
+    readonly
+    style="height: 200px"
+  ></textarea>
 </div>
+
+<div class="footer-dark"></div>

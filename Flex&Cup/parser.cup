@@ -1,0 +1,1127 @@
+package com.clc.backend.analizadores.sintactico;
+
+import com.clc.backend.datos.CaptchaDAO;
+import com.clc.backend.generator.NameTokenGenerator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import com.clc.backend.model.Captcha;
+import com.clc.backend.model.errores.ErrorAnalisis;
+import com.clc.backend.model.errores.TipoError;
+import com.clc.backend.model.scripting.Expresion;
+import com.clc.backend.model.scripting.Function;
+import com.clc.backend.model.scripting.ifstatement.ElseIfStatement;
+import com.clc.backend.model.scripting.ifstatement.ElseStatement;
+import com.clc.backend.model.scripting.ifstatement.IfStatement;
+import com.clc.backend.model.scripting.ifstatement.IfType;
+import com.clc.backend.model.scripting.Instruction;
+import com.clc.backend.model.scripting.Process;
+import com.clc.backend.model.scripting.statement.Assignment;
+import com.clc.backend.model.scripting.statement.FullStatement;
+import com.clc.backend.model.scripting.statement.SimpleStatement;
+import com.clc.backend.model.scripting.TipoDato;
+import com.clc.backend.model.scripting.Variable;
+import com.clc.backend.model.scripting.VariableTS;
+import com.clc.backend.model.tags.body.Body;
+import com.clc.backend.model.tags.body.Br;
+import com.clc.backend.model.tags.body.Button;
+import com.clc.backend.model.tags.body.Div;
+import com.clc.backend.model.tags.body.H1;
+import com.clc.backend.model.tags.head.Head;
+import com.clc.backend.model.tags.body.Img;
+import com.clc.backend.model.tags.body.Input;
+import com.clc.backend.model.tags.head.Link;
+import com.clc.backend.model.tags.body.Option;
+import com.clc.backend.model.tags.body.P;
+import com.clc.backend.model.tags.body.Scripting;
+import com.clc.backend.model.tags.body.Select;
+import com.clc.backend.model.tags.body.Span;
+import com.clc.backend.model.tags.body.TextArea;
+import com.clc.backend.model.tags.CC;
+import com.clc.backend.model.tags.head.Title;
+import com.clc.backend.model.tags.Parametro;
+import com.clc.backend.model.tags.Tag;
+import com.clc.backend.model.Token;
+import com.clc.backend.model.TypeToken;
+import com.clc.backend.validator.and.AndValidator;
+import com.clc.backend.validator.AsignacionValidator;
+import com.clc.backend.validator.divide.DivideValidator;
+import com.clc.backend.validator.equalto.EqualToValidator;
+import com.clc.backend.validator.greaterorequal.GreaterOrEqualValidator;
+import com.clc.backend.validator.greaterthan.GreaterThanValidator;
+import com.clc.backend.validator.lessorequal.LessOrEqualValidator;
+import com.clc.backend.validator.lessthan.LessThanValidator;
+import com.clc.backend.validator.minus.MinusValidator;
+import com.clc.backend.validator.not.NotValidator;
+import com.clc.backend.validator.notequalto.NotEqualToValidator;
+import com.clc.backend.validator.OperatorValidator;
+import com.clc.backend.validator.or.OrValidator;
+import com.clc.backend.validator.plus.PlusValidator;
+import com.clc.backend.validator.times.TimesValidator;
+import com.clc.backend.validator.VariableValidator;
+import java_cup.runtime.Symbol;
+
+parser code{:
+
+    private final CaptchaDAO captchaDAO = new CaptchaDAO();
+    private final List<ErrorAnalisis> errores = new ArrayList();
+    private List<Parametro> parametros = new ArrayList();
+    private List<String> tagIds = new ArrayList();
+    private List<Tag> etiquetas = new ArrayList();
+    private List<Tag> etiquetasHead = new ArrayList();
+    private Stack<List<Tag>> pilaEtiquetas = new Stack();
+    private Stack<List<Parametro>> pilaParams = new Stack();
+    private String link;
+    private String idCaptcha;
+    private Tag ccTag;
+
+    private Process onLoad = null;
+    private List<Process> processList = new ArrayList();
+    private List<Instruction> instructionList = new ArrayList();
+    private List<Variable> variableList = new ArrayList();
+    private List<VariableTS> variableListGlobal = new ArrayList();
+    private List<String> varsToAssign = new ArrayList();
+    private List<IfType> ifTypesList = new ArrayList();
+    private Stack<List<IfType>> pilaIfTypes = new Stack();
+    private Stack<List<Instruction>> pilaInstructions = new Stack();
+    private String errorCondition = "";
+    private Stack<String> pilaConditions = new Stack();
+
+    private OperatorValidator plusValidator = new PlusValidator();
+    private OperatorValidator minusValidator = new MinusValidator();
+    private OperatorValidator timesValidator = new TimesValidator();
+    private OperatorValidator divideValidator = new DivideValidator();
+    private OperatorValidator equalValidator = new EqualToValidator();
+    private OperatorValidator notEqualValidator = new NotEqualToValidator();
+    private OperatorValidator andValidator = new AndValidator();
+    private OperatorValidator orValidator = new OrValidator();
+    private NotValidator notValidator = new NotValidator();
+    private OperatorValidator greaterValidator = new GreaterThanValidator();
+    private OperatorValidator lessValidator = new LessThanValidator();
+    private OperatorValidator greaterOrEqualValidator = new GreaterOrEqualValidator();
+    private OperatorValidator lessOrEqualValidator = new LessOrEqualValidator();
+
+    private VariableValidator varValidator = new VariableValidator();
+    private AsignacionValidator assignValidator = new AsignacionValidator();
+
+    private String currentProcess;
+    private String errorVar = "";
+    private int countOnLoad = 0;
+
+    public List<ErrorAnalisis> getErrores() {
+        return this.errores;
+    }
+
+    public List<VariableTS> getVariables() {
+        return this.variableListGlobal;
+    }
+
+    public Tag getCC() {
+        return this.ccTag;
+    }
+
+    private boolean canAdded(String id) {
+        for (String i: tagIds) {
+            if (i.equals(id)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean canAdded2(String id) {
+
+        if (captchaDAO.exists()) {
+            for (Captcha c: captchaDAO.getObject()) {
+                if (c.getId().equals(id)) {
+                    return false;
+                }
+            }
+        }
+        for (String i: tagIds) {
+            if (i.equals(id)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void syntax_error(Symbol s) {
+        Token t = (Token) s.value;
+        String descripcion = "Error en: " + t.getLexema();
+        StringBuilder solucion = new StringBuilder("Se esperaba ");
+        expected_token_ids().forEach(x -> solucion.append(NameTokenGenerator.getName(x)).append(", "));
+        errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SINTACTICO, descripcion, solucion.toString()));
+        System.out.println(t.getLexema() + ", linea: " + t.getLinea() + ", col: " + t.getColumna() + ", descripcion: " + descripcion.toString());
+    }
+
+    public void unrecovered_syntax_error(Symbol cur_token){
+        Token t = (Token) cur_token.value;
+        System.out.println("Error irrecuperable " + t.getLexema());
+    }
+
+    protected int error_sync_size() {
+        return 1;
+    }
+:}
+
+//* Terminales
+
+terminal Token      C_CC, C_HEAD, C_TITLE, C_LINK, C_BODY, C_SPAM, C_INPUT, C_TEXTAREA, C_SELECT;
+terminal Token      C_OPTION, C_DIV, C_IMG, C_BR, C_BUTTON, C_H1, C_P, C_SCRIPTING;
+
+terminal Token      HREF, BACKGROUND, COLOR, FONT_SIZE, FONT_FAMILY, TEXT_ALIGN;
+terminal Token      TYPE, ID, NAME, COLS, ROWS, CLASS, SRC, WIDTH, HEIGHT, ALT, ONCLICK;
+
+terminal Token      BLACK, OLIVE, TEAL, RED, BLUE, MARRON, NAVY, GRAY, LIME, FUCHSIA, GREEN, PURPLE;
+terminal Token      SILVER, YELLOW, AQUA;
+terminal Token      COURIER, VERDANA, ARIAL, GENEVA, SANS_SERIF;
+terminal Token      LEFT, CENTER, RIGHT, JUSTIFY;
+terminal Token      TEXT, NUMBER, RADIO, CHECKBOX;
+terminal Token      COLUMN, ROW;
+terminal Token      URL, COLOR_VALUE, SIZE, WH_VAL, ID_PARAM, NAME_PARAM;
+
+terminal Token      ON_LOAD, GLOBAL_MODE;
+
+terminal TypeToken  INTEGER, DECIMAL, BOOLEAN, CHAR, STRING;
+
+terminal TypeToken  ASC, DESC, LETPAR_NUM, LETIMPAR_NUM, REVERSE, CARACTER_ALEATORIO, NUM_ALEATORIO, ELEMENT_BY_ID;
+terminal Token      ALERT_INFO, EXIT, REDIRECT;
+
+terminal Token      INIT, END, IF, THEN, ELSE, REPEAT, HUNTIL, WHILE, THENWHILE, INSERT;
+
+terminal Token      OPEN_BRACKET, CLOSE_BRACKET, OPEN_ROUND_BRACKET, CLOSE_ROUND_BRACKET, COMMA;
+terminal Token      OPEN_BRACE, CLOSE_BRACE, SLASH, ASSIGN, QOUTE_MARK, COLON, SEMI;
+
+terminal Token      EQUAL_TO, NOT_EQTUAL_TO, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO;
+
+terminal Token      OR, AND, NOT, PLUS, MINUS, TIMES, DIVIDE;
+
+terminal Token      ENTERO, PROCESS_NAME, ID_VAR, TEXT_TAG, DATOSCRIPT;
+terminal TypeToken  ENTERO2, DECIMAL_VAL, CHAR_VAL, LITERAL, TRUE, FALSE;
+
+
+//* No terminales
+
+non terminal            cc, headTags, link, title, bodyTags, bodyTag, nameTagBody;
+non terminal            optionsTag, optionTag, optionTextParam;
+non terminal            paramsCC, paramCC, optionParamCC;
+non terminal            paramsSPAM, paramSPAM, optionParamSPAM;
+non terminal            paramsINPUT, paramINPUT, optionParamINPUT;
+non terminal            paramsTEXTA, paramTEXTA, optionParamTEXTA;
+non terminal            paramsSEL, paramSEL, optionParamSEL, inicioSelect;
+non terminal            paramsDIV, paramDIV, optionParamDIV, inicioDIV;
+non terminal            paramsIMG, paramIMG, optionParamIMG;
+non terminal            paramsBTN, paramBTN, optionParamBTN;
+non terminal            paramsH1, paramH1, optionParamH1;
+non terminal            paramsP, paramP, optionParamP;
+non terminal            href, background;
+non terminal            paramColor;
+non terminal Tag        head, body;
+non terminal String     textTag, color, font, align, type, clase, paramId, size, optionId;
+
+non terminal            procesos, process, processBody, instructions, instruction, oneStatement;
+non terminal            fullStatement, statement, assignment, instructionBlock;
+non terminal Token      ifStatement, simpleIf, ifTypes;
+non terminal            repeatStatement, simpleRepeat, varInicio, limit;
+non terminal            whileStatement, simpleWhile;
+non terminal            insertStatement, insertValues, insertValue;
+non terminal            otherFunctions, roundBrackets;
+non terminal String     variables, variable, parameter;
+non terminal TypeToken  tipo;
+non terminal Expresion  values, numero, literal, caracter, bool;
+non terminal Expresion  expr, mathExpr, assign, specialFunctions;
+
+//* Precedencias
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE;
+precedence left EQUAL_TO, NOT_EQTUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO;
+precedence left OR;
+precedence left AND;
+precedence left NOT;
+
+
+//**************************************** Etiqueta CC
+cc
+    ::= LESS_THAN C_CC paramsCC GREATER_THAN textTag head:h body:b LESS_THAN SLASH C_CC GREATER_THAN textTag {:
+        parametros = pilaParams.pop();
+        ccTag = new CC(h, b, parametros);
+        parametros = new ArrayList();
+    :}
+;
+
+//**************************************** Parametros CC
+paramsCC
+    ::= paramsCC paramCC
+    |   paramCC
+;
+
+paramCC
+    ::= OPEN_BRACKET optionParamCC CLOSE_BRACKET
+;
+
+optionParamCC
+    ::= NAME:n ASSIGN QOUTE_MARK NAME_PARAM:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   ID:n ASSIGN QOUTE_MARK optionId:v QOUTE_MARK {:
+        if (canAdded2(v)) {
+            if (canAdded(v)) {
+                parametros.add(new Parametro(n.getLexema(), v));
+                idCaptcha = v;
+                tagIds.add(v);
+            } else {
+                errores.add(new ErrorAnalisis(n.getLinea(), n.getColumna(), TipoError.SEMANTICO, "El id especificado esta repetido", "Cambie el id"));
+            }
+        } else {
+            errores.add(new ErrorAnalisis(n.getLinea(), n.getColumna(), TipoError.SEMANTICO, "Ya existe un captcha con el id ingresado", "Cambie el id"));
+        }
+    :}
+;
+
+
+//**************************************** Etiqueta HEAD
+head
+    ::= {:
+            pilaParams.push(parametros);
+            parametros = new ArrayList();
+        :}
+        LESS_THAN C_HEAD GREATER_THAN textTag headTags LESS_THAN SLASH C_HEAD GREATER_THAN textTag {:
+            RESULT = new Head(etiquetasHead);
+            etiquetasHead = new ArrayList();
+        :}
+
+    |   error textTag
+;
+
+headTags
+    ::= link title
+    |   title link
+;
+
+//**************************************** Etiquetas LINK y TITLE
+title
+    ::= LESS_THAN C_TITLE GREATER_THAN textTag:t LESS_THAN SLASH C_TITLE GREATER_THAN textTag {:
+        etiquetasHead.add(new Title(t.trim()));
+    :}
+;
+
+link
+    ::= LESS_THAN C_LINK href GREATER_THAN textTag LESS_THAN SLASH C_LINK GREATER_THAN textTag {:
+        etiquetasHead.add(new Link(parametros));
+        parametros = new ArrayList();
+    :}
+;
+
+href
+    ::= OPEN_BRACKET HREF:n ASSIGN QOUTE_MARK URL:v QOUTE_MARK CLOSE_BRACKET {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+        link = v.getLexema();
+    :}
+;
+
+
+//**************************************** Etiqueta BODY
+body
+    ::= LESS_THAN C_BODY background GREATER_THAN textTag bodyTags LESS_THAN SLASH C_BODY GREATER_THAN textTag {:
+        RESULT = new Body(etiquetas, parametros);
+        parametros = new ArrayList();
+    :}
+
+    |   error textTag
+;
+
+bodyTags
+    ::= bodyTags bodyTag
+    |   bodyTag
+;
+
+bodyTag
+    ::= LESS_THAN nameTagBody GREATER_THAN textTag
+    |   LESS_THAN C_BR GREATER_THAN textTag {:
+        etiquetas.add(new Br());
+    :}
+;
+
+
+//**************************************** Resto de etiquetas
+nameTagBody
+    ::= C_SPAM paramsSPAM GREATER_THAN textTag:t LESS_THAN SLASH C_SPAM {:
+            etiquetas.add(new Span(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   C_INPUT paramsINPUT GREATER_THAN textTag:t LESS_THAN SLASH C_INPUT {:
+            etiquetas.add(new Input(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   C_TEXTAREA paramsTEXTA GREATER_THAN textTag:t LESS_THAN SLASH C_TEXTAREA {:
+            etiquetas.add(new TextArea(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   inicioSelect textTag:t optionsTag LESS_THAN SLASH C_SELECT {:
+            Select sel = new Select(etiquetas, t, parametros);
+            parametros = new ArrayList();
+            etiquetas = pilaEtiquetas.pop();
+            etiquetas.add(sel);
+        :}
+
+    |   C_IMG paramsIMG GREATER_THAN textTag LESS_THAN SLASH C_IMG {:
+            etiquetas.add(new Img(parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   C_BUTTON paramsBTN GREATER_THAN textTag:t LESS_THAN SLASH C_BUTTON {:
+            etiquetas.add(new Button(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   C_H1 paramsH1 GREATER_THAN textTag:t LESS_THAN SLASH C_H1 {:
+            etiquetas.add(new H1(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   C_P paramsP GREATER_THAN textTag:t LESS_THAN SLASH C_P {:
+            etiquetas.add(new P(t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   inicioDIV textTag:t LESS_THAN SLASH C_DIV {:
+            etiquetas = pilaEtiquetas.pop();
+            etiquetas.add(new Div(null, t, parametros));
+            parametros = new ArrayList();
+        :}
+
+    |   inicioDIV textTag:t bodyTags LESS_THAN SLASH C_DIV {:
+            parametros = pilaParams.pop();
+            Div div = new Div(etiquetas, t, parametros);
+            parametros = new ArrayList();
+            etiquetas = pilaEtiquetas.pop();
+            etiquetas.add(div);
+        :}
+
+    |   C_SCRIPTING GREATER_THAN procesos LESS_THAN DIVIDE C_SCRIPTING {:
+            etiquetas.add(new Scripting(onLoad, processList));
+            onLoad = null;
+            processList = new ArrayList();
+        :}
+;
+
+inicioSelect
+    ::= C_SELECT paramsSEL GREATER_THAN {:
+        pilaEtiquetas.push(etiquetas);
+        etiquetas = new ArrayList();
+    :}
+;
+
+
+inicioDIV
+    ::= C_DIV paramsDIV GREATER_THAN {:
+        pilaEtiquetas.push(etiquetas);
+        etiquetas = new ArrayList();
+        pilaParams.push(parametros);
+        parametros = new ArrayList();
+    :}
+;
+
+
+//**************************************** Etiqueta OPTION
+optionsTag
+    ::= optionsTag optionTag
+    |   optionTag
+;
+
+optionTag
+    ::= LESS_THAN C_OPTION GREATER_THAN textTag:o LESS_THAN SLASH C_OPTION GREATER_THAN textTag {:
+        etiquetas.add(new Option(o));
+    :}
+;
+
+
+//**************************************** Parametro BODY
+background
+    ::= OPEN_BRACKET BACKGROUND:n ASSIGN QOUTE_MARK color:v QOUTE_MARK CLOSE_BRACKET {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+;
+
+
+//**************************************** Texto entre etiquetas
+textTag
+    ::= TEXT_TAG:t  {:RESULT = t.getLexema();:}
+    |               {:RESULT = "";:}
+;
+
+
+//**************************************** Parametros SPAM
+paramsSPAM
+    ::= paramsSPAM paramSPAM
+    |   paramSPAM
+;
+
+paramSPAM
+    ::= OPEN_BRACKET optionParamSPAM CLOSE_BRACKET
+;
+
+optionParamSPAM
+    ::= paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros INPUT
+paramsINPUT
+    ::= paramsINPUT paramINPUT
+    |   paramINPUT
+;
+
+paramINPUT
+    ::= OPEN_BRACKET optionParamINPUT CLOSE_BRACKET
+;
+
+optionParamINPUT
+    ::= TYPE:n ASSIGN QOUTE_MARK type:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros TEXT_AREA
+paramsTEXTA
+    ::= paramsTEXTA paramTEXTA
+    |   paramTEXTA
+;
+
+paramTEXTA
+    ::= OPEN_BRACKET optionParamTEXTA CLOSE_BRACKET
+;
+
+optionParamTEXTA
+    ::= ROWS:n ASSIGN QOUTE_MARK ENTERO:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   COLS:n ASSIGN QOUTE_MARK ENTERO:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros SELECT
+paramsSEL
+    ::= paramsSEL paramSEL
+    |   paramSEL
+;
+
+paramSEL
+    ::= OPEN_BRACKET optionParamSEL CLOSE_BRACKET
+;
+
+optionParamSEL
+    ::= paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros DIV
+paramsDIV
+    ::= paramsDIV paramDIV
+    |   paramDIV
+;
+
+paramDIV
+    ::= OPEN_BRACKET optionParamDIV CLOSE_BRACKET
+;
+
+optionParamDIV
+    ::= BACKGROUND:n ASSIGN QOUTE_MARK color:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   CLASS:n ASSIGN QOUTE_MARK clase:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros IMG
+paramsIMG
+    ::= paramsIMG paramIMG
+    |   paramIMG
+;
+
+paramIMG
+    ::= OPEN_BRACKET optionParamIMG CLOSE_BRACKET
+;
+
+optionParamIMG
+    ::= ALT:n ASSIGN QOUTE_MARK NAME_PARAM:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   HEIGHT:n ASSIGN QOUTE_MARK size:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   WIDTH:n ASSIGN QOUTE_MARK size:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   SRC:n ASSIGN QOUTE_MARK URL:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   paramId
+;
+
+size
+    ::= SIZE:s    {:RESULT = s.getLexema();:}
+    |   WH_VAL:s  {:RESULT = s.getLexema();:}
+;
+
+
+//****************************************Parametros BUTTON
+paramsBTN
+    ::= paramsBTN paramBTN
+    |   paramBTN
+;
+
+paramBTN
+    ::= OPEN_BRACKET optionParamBTN CLOSE_BRACKET
+;
+
+optionParamBTN//Falta onclick
+    ::= BACKGROUND:n ASSIGN QOUTE_MARK color:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   ONCLICK:n ASSIGN QOUTE_MARK PROCESS_NAME:v OPEN_ROUND_BRACKET CLOSE_ROUND_BRACKET QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros H1
+paramsH1
+    ::= paramsH1 paramH1
+    |   paramH1
+;
+
+paramH1
+    ::= OPEN_BRACKET optionParamH1 CLOSE_BRACKET
+;
+
+optionParamH1
+    ::= paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros P
+paramsP
+    ::= paramsP paramP
+    |   paramP
+;
+
+paramP
+    ::= OPEN_BRACKET optionParamP CLOSE_BRACKET
+;
+
+optionParamP
+    ::= paramColor
+    |   paramId
+    |   optionTextParam
+;
+
+
+//**************************************** Parametros relacionados a texto
+optionTextParam
+    ::= FONT_SIZE:n ASSIGN QOUTE_MARK SIZE:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v.getLexema()));
+    :}
+    |   FONT_FAMILY:n ASSIGN QOUTE_MARK font:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+    |   TEXT_ALIGN:n ASSIGN QOUTE_MARK align:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+;
+
+
+//**************************************** Parametros frecuentes
+paramId
+    ::= ID:n ASSIGN QOUTE_MARK optionId:v QOUTE_MARK {:
+        if (canAdded(v)) {
+            parametros.add(new Parametro(n.getLexema(), v));
+            tagIds.add(v);
+        } else {
+            errores.add(new ErrorAnalisis(n.getLinea(), n.getColumna(), TipoError.SEMANTICO, "El id especificado esta repetido", "Cambie el nombre del id"));
+        }
+    :}
+;
+
+optionId
+    ::= ID_PARAM:i      {:RESULT = i.getLexema();:}
+    |   NAME_PARAM:i    {:RESULT = i.getLexema();:}
+;
+
+paramColor
+    ::= COLOR:n ASSIGN QOUTE_MARK color:v QOUTE_MARK {:
+        parametros.add(new Parametro(n.getLexema(), v));
+    :}
+;
+
+
+//**************************************** Colores
+color
+    ::= COLOR_VALUE:c       {:RESULT = c.getLexema();:}
+    |   BLACK:c             {:RESULT = c.getLexema();:}
+    |   OLIVE:c             {:RESULT = c.getLexema();:}
+    |   TEAL:c              {:RESULT = c.getLexema();:}
+    |   RED:c               {:RESULT = c.getLexema();:}
+    |   BLUE:c              {:RESULT = c.getLexema();:}
+    |   MARRON:c            {:RESULT = c.getLexema();:}
+    |   NAVY:c              {:RESULT = c.getLexema();:}
+    |   GRAY:c              {:RESULT = c.getLexema();:}
+    |   LIME:c              {:RESULT = c.getLexema();:}
+    |   FUCHSIA:c           {:RESULT = c.getLexema();:}
+    |   GREEN:c             {:RESULT = c.getLexema();:}
+    |   PURPLE:c            {:RESULT = c.getLexema();:}
+    |   SILVER:c            {:RESULT = c.getLexema();:}
+    |   YELLOW:c            {:RESULT = c.getLexema();:}
+    |   AQUA:c              {:RESULT = c.getLexema();:}
+;
+
+
+//**************************************** Fuentes de texto
+font
+    ::= COURIER:f           {:RESULT = f.getLexema();:}
+    |   VERDANA:f           {:RESULT = f.getLexema();:}
+    |   ARIAL:f             {:RESULT = f.getLexema();:}
+    |   GENEVA:f            {:RESULT = f.getLexema();:}
+    |   SANS_SERIF:f        {:RESULT = f.getLexema();:}
+;
+
+
+//**************************************** Alineacion de texto
+align
+    ::= LEFT:a              {:RESULT = a.getLexema();:}
+    |   CENTER:a            {:RESULT = a.getLexema();:}
+    |   RIGHT:a             {:RESULT = a.getLexema();:}
+    |   JUSTIFY:a           {:RESULT = a.getLexema();:}
+;
+
+
+//**************************************** Tipos de input
+type
+    ::= TEXT:t              {:RESULT = t.getLexema();:}
+    |   NUMBER:t            {:RESULT = t.getLexema();:}
+    |   RADIO:t             {:RESULT = t.getLexema();:}
+    |   CHECKBOX:t          {:RESULT = t.getLexema();:}
+;
+
+//**************************************** Procesos
+procesos
+    ::= procesos process
+    |   process
+;
+
+process
+    ::= ON_LOAD:p {:currentProcess = p.getLexema() + ++countOnLoad;:} processBody {:
+            if (onLoad == null) {
+                onLoad = new Process(p.getLexema() + countOnLoad++, instructionList);
+            } else {
+                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "Hay ma de un proceso ON_LOAD", "Deje solo un metodo ON_LOAD en el proceso"));
+            }
+            instructionList = new ArrayList();
+            variableList = new ArrayList();
+        :}
+    |   PROCESS_NAME:p {:currentProcess = p.getLexema();:} processBody {:
+            boolean exists = false;
+
+            for (Process pp:  processList) {
+                if (pp.getName().equals(p.getLexema())) {
+                    exists = true;
+                }
+            }
+            if (exists) {
+                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "El proceso con el nombre especificado ya existe", "Cambie el nombre del proceso"));
+            } else {
+                processList.add(new Process(p.getLexema(), instructionList));
+            }
+            instructionList = new ArrayList();
+            variableList = new ArrayList();
+        :}
+;
+
+processBody
+    ::= OPEN_ROUND_BRACKET CLOSE_ROUND_BRACKET OPEN_BRACKET CLOSE_BRACKET
+    |   OPEN_ROUND_BRACKET CLOSE_ROUND_BRACKET OPEN_BRACKET instructions CLOSE_BRACKET
+;
+
+//**************************************** Instrucciones
+instructions
+    ::= instructions instruction
+    |   instruction
+;
+
+instruction
+    ::= oneStatement SEMI
+    |   {:
+            pilaIfTypes.push(ifTypesList);
+            ifTypesList = new ArrayList();
+        :}
+        ifStatement:i {:
+            if (errorCondition.isEmpty()) {
+                IfStatement ifSt = new IfStatement(pilaConditions.pop(), instructionList, ifTypesList);
+                instructionList = pilaInstructions.pop();
+                ifTypesList = pilaIfTypes.pop();
+                instructionList.add(ifSt);
+            } else {
+                instructionList = pilaInstructions.pop();
+                errores.add(new ErrorAnalisis(i.getLinea(), i.getColumna(), TipoError.SEMANTICO, errorCondition, "Verifique la condicion ingresada"));
+                errorCondition = "";
+            }
+        :}
+    |   repeatStatement
+    |   whileStatement
+    |   insertStatement
+    |   error SEMI
+    |   error END
+;
+
+oneStatement
+    ::= fullStatement
+    |   statement
+    |   assignment
+    |   otherFunctions
+;
+
+//**************************************** Declaraciones y asignaciones
+fullStatement
+    ::= tipo:t GLOBAL_MODE variables ASSIGN assign:a {:
+            if (errorVar.isEmpty()) {
+                List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
+
+                if (errores.isEmpty()) {
+                    varsToAssign.forEach(v -> {
+                        variableList.add(new Variable(v, t.getType(), true));
+                        variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess));
+                    });
+                    instructionList.add(new FullStatement(t.getType(), true, varsToAssign, a.getText()));
+                } else {
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                }
+            } else {
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errorVar = "";
+            }
+            varsToAssign = new ArrayList();
+        :}
+    |   tipo:t variables ASSIGN assign:a {:
+            if (errorVar.isEmpty()) {
+                List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
+
+                if (errores.isEmpty()) {
+                    varsToAssign.forEach(v -> {
+                        variableList.add(new Variable(v, t.getType(), true));
+                        variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess));
+                    });
+                    instructionList.add(new FullStatement(t.getType(), false, varsToAssign, a.getText()));
+                } else {
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                }
+            } else {
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errorVar = "";
+            }
+            varsToAssign = new ArrayList();
+        :}
+;
+
+statement
+::= tipo:t GLOBAL_MODE variables {:
+        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+
+        if (errores.isEmpty()) {
+            varsToAssign.forEach(v -> {
+                variableList.add(new Variable(v, t.getType(), false));
+                variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess));
+            });
+            instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
+        } else {
+            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+        }
+        varsToAssign = new ArrayList();
+    :}
+|   tipo:t variables {:
+        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+
+        if (errores.isEmpty()) {
+            varsToAssign.forEach(v -> {
+                variableList.add(new Variable(v, t.getType(), false));
+                variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess));
+            });
+            instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
+        } else {
+            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+        }
+        varsToAssign = new ArrayList();
+    :}
+;
+
+assignment
+    ::= variable:v ASSIGN:t assign:a {:
+            if (errorVar.isEmpty()) {
+                String error = assignValidator.validate(variableList, v, a);
+
+                if (error.isEmpty()) {
+                    instructionList.add(new Assignment(v, a.getText()));
+                } else {
+                    errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignacion"));
+                }
+            } else {
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la asignacion"));
+                errorVar = "";
+            }
+        :}
+;
+
+//**************************************** Sentencia if
+ifStatement
+    ::= simpleIf:i instructionBlock END ifTypes   {:RESULT = i;:}
+    |   simpleIf:i oneStatement SEMI ifTypes      {:RESULT = i;:}
+;
+
+simpleIf
+    ::= IF:i OPEN_ROUND_BRACKET expr:c CLOSE_ROUND_BRACKET THEN {:
+            if (c.getTipo() == null) {
+                errorCondition = "La condicion contiene una operacion entre tipos no valida";
+                c.setText(errorCondition);
+            } else if (c.getTipo() != TipoDato.BOOLEAN) {
+                errorCondition = "El tipo que retorna la expresion debe ser booleano";
+                c.setText(errorCondition);
+            }
+            pilaConditions.push(c.getText());
+            pilaInstructions.push(instructionList);
+            instructionList = new ArrayList();
+            RESULT = i;
+        :}
+;
+
+ifTypes
+    ::= ELSE {:
+            pilaInstructions.push(instructionList);
+            instructionList = new ArrayList();
+        :}
+        instructionBlock END {:
+            ifTypesList.add(new ElseStatement(instructionList));
+            instructionList = pilaInstructions.pop();
+        :}
+    |   ELSE {:
+            pilaInstructions.push(instructionList);
+            instructionList = new ArrayList();
+        :}
+        oneStatement SEMI {:
+            ifTypesList.add(new ElseStatement(instructionList));
+            instructionList = pilaInstructions.pop();
+        :}
+    |   ELSE ifStatement {:
+            ifTypesList.add(new ElseIfStatement(pilaConditions.pop(), instructionList));
+            instructionList = pilaInstructions.pop();
+        :}
+    |
+;
+
+//**************************************** Ciclo repeat
+repeatStatement
+    ::= simpleRepeat instructionBlock END
+    |   simpleRepeat oneStatement SEMI
+;
+
+simpleRepeat
+    ::= REPEAT OPEN_ROUND_BRACKET varInicio CLOSE_ROUND_BRACKET HUNTIL OPEN_ROUND_BRACKET limit CLOSE_ROUND_BRACKET
+;
+
+varInicio
+    ::= fullStatement
+    |   assignment
+;
+
+limit
+    ::= mathExpr
+    |   variable
+;
+
+mathExpr
+    ::= mathExpr PLUS mathExpr
+    |   mathExpr MINUS mathExpr
+    |   mathExpr TIMES mathExpr
+    |   mathExpr DIVIDE mathExpr
+    |   OPEN_ROUND_BRACKET mathExpr CLOSE_ROUND_BRACKET
+    |   OPEN_ROUND_BRACKET mathExpr CLOSE_ROUND_BRACKET PLUS mathExpr
+    |   OPEN_ROUND_BRACKET mathExpr CLOSE_ROUND_BRACKET MINUS mathExpr
+    |   OPEN_ROUND_BRACKET mathExpr CLOSE_ROUND_BRACKET TIMES mathExpr
+    |   OPEN_ROUND_BRACKET mathExpr CLOSE_ROUND_BRACKET DIVIDE mathExpr
+    |   numero
+;
+
+//**************************************** Ciclo while
+whileStatement
+    ::= simpleWhile instructionBlock END
+    |   simpleWhile oneStatement SEMI
+;
+
+simpleWhile
+    ::= WHILE OPEN_ROUND_BRACKET expr CLOSE_ROUND_BRACKET THENWHILE
+;
+
+instructionBlock
+    ::= INIT OPEN_BRACE COLON instructions COLON CLOSE_BRACE
+;
+
+//**************************************** Instruccion insert
+insertStatement
+    ::= INSERT OPEN_ROUND_BRACKET insertValues CLOSE_ROUND_BRACKET SEMI
+;
+
+insertValues
+    ::= insertValues COMMA insertValue
+    |   insertValue
+;
+
+insertValue
+    ::= literal
+    |   numero
+    |   variable
+;
+
+//**************************************** Tipos
+tipo
+    ::= INTEGER:t   {:RESULT = t;:}
+    |   STRING:t    {:RESULT = t;:}
+    |   BOOLEAN:t   {:RESULT = t;:}
+    |   CHAR:t      {:RESULT = t;:}
+    |   DECIMAL:t   {:RESULT = t;:}
+;
+
+//**************************************** Variables
+variables
+    ::= variables COMMA variable:v      {:varsToAssign.add(v);:}
+    |   variable:v                      {:varsToAssign.add(v);:}
+;
+
+variable
+    ::= ID_VAR:v        {:RESULT = v.getLexema();:}
+;
+
+//**************************************** Expresion de declaracion
+assign
+    ::= expr:a              {:RESULT = a;:}
+;
+
+expr
+    ::= expr:e1 PLUS expr:e2                                {:RESULT = plusValidator.validate(e1, e2);:}
+    |   expr:e1 MINUS expr:e2                               {:RESULT = minusValidator.validate(e1, e2);:}
+    |   expr:e1 TIMES expr:e2                               {:RESULT = timesValidator.validate(e1, e2);:}
+    |   expr:e1 DIVIDE expr:e2                              {:RESULT = divideValidator.validate(e1, e2);:}
+    |   expr:e1 EQUAL_TO expr:e2                            {:RESULT = equalValidator.validate(e1, e2);:}
+    |   expr:e1 NOT_EQTUAL_TO expr:e2                       {:RESULT = notEqualValidator.validate(e1, e2);:}
+    |   expr:e1 GREATER_THAN expr:e2                        {:RESULT = greaterValidator.validate(e1, e2);:}
+    |   expr:e1 LESS_THAN expr:e2                           {:RESULT = lessValidator.validate(e1, e2);:}
+    |   expr:e1 GREATER_THAN_OR_EQUAL_TO expr:e2            {:RESULT = greaterOrEqualValidator.validate(e1, e2);:}
+    |   expr:e1 LESS_THAN_OR_EQUAL_TO expr:e2               {:RESULT = lessOrEqualValidator.validate(e1, e2);:}
+    |   expr:e1 AND expr:e2                                 {:RESULT = andValidator.validate(e1, e2);:}
+    |   expr:e1 OR expr:e2                                  {:RESULT = orValidator.validate(e1, e2);:}
+    |   OPEN_ROUND_BRACKET expr:e CLOSE_ROUND_BRACKET       {:RESULT = new Expresion(e.getTipo(), "(" + e.getText() + ")");:}
+    |   NOT expr:e                                          {:RESULT = notValidator.validate(e);:}
+    |   values:v                                            {:RESULT = v;:}
+    |   variable:v                                          {:
+            Expresion tempExpr = varValidator.validate(variableList, v, currentProcess);
+
+            if (tempExpr.getTipo() == null) {
+                errorVar = tempExpr.getText();
+            }
+
+            RESULT = tempExpr;
+        :}
+    |   specialFunctions: sf    {:RESULT = sf;:}
+;
+
+//**************************************** Funciones especiales
+specialFunctions
+    ::= ASC:sf parameter:p                      {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "(" + p + ")");:}
+    |   DESC:sf parameter:p                     {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "(" + p + ")");:}
+    |   LETPAR_NUM:sf parameter:p               {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "(" + p + ")");:}
+    |   LETIMPAR_NUM:sf parameter:p             {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "(" + p + ")");:}
+    |   REVERSE:sf parameter:p                  {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "(" + p + ")");:}
+    |   CARACTER_ALEATORIO:sf roundBrackets     {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "()");:}
+    |   NUM_ALEATORIO:sf roundBrackets          {:RESULT = new Expresion(sf.getType(), sf.getLexema() + "()");:}
+    |   ELEMENT_BY_ID:sf parameter:p            {:RESULT = new Expresion(sf.getType(), "document.getElementById(" + p + ").value");:}
+;
+
+otherFunctions
+    ::= EXIT:of roundBrackets                   {:instructionList.add(new Function(of.getLexema(), "(\"" + idCaptcha + "\")"));:}
+    |   ALERT_INFO:of parameter:p               {:instructionList.add(new Function("alert", "(" + p + ")"));:}
+    |   REDIRECT:of roundBrackets               {:instructionList.add(new Function(of.getLexema(), "(\"" + link + "\", \"" + idCaptcha + "\")"));:}
+;
+
+parameter
+    ::= OPEN_ROUND_BRACKET expr:e CLOSE_ROUND_BRACKET {:
+            if (e.getTipo() != TipoDato.STRING) {
+                errorVar = "El tipo del parametro debe de ser tipo string";
+            }
+            RESULT = e.getText();
+        :}
+
+    |   OPEN_ROUND_BRACKET DATOSCRIPT:d CLOSE_ROUND_BRACKET {:
+            if (canAdded(d.getLexema())) {
+                System.out.println("No existe una etiqueta con el id especificado");
+                errores.add(new ErrorAnalisis(d.getLinea(), d.getColumna(), TipoError.SEMANTICO, "No existe una etiqueta con el id especificado", "Ingrese un id de una etiqueta existente"));
+            }
+            RESULT = "'" + d.getLexema() + "'";
+        :}
+;
+
+roundBrackets
+    ::= OPEN_ROUND_BRACKET CLOSE_ROUND_BRACKET
+;
+
+//**************************************** Valores de finales
+values
+    ::= numero:v        {:RESULT = v;:}
+    |   caracter:v      {:RESULT = v;:}
+    |   literal:v       {:RESULT = v;:}
+    |   bool:v          {:RESULT = v;:}
+;
+
+//**************************************** Valores numericos
+numero
+    ::= ENTERO2:n        {:RESULT = new Expresion(n.getType(), n.getLexema());:}
+    |   DECIMAL_VAL:n   {:RESULT = new Expresion(n.getType(), n.getLexema());:}
+;
+
+//**************************************** Caracter
+caracter
+    ::= CHAR_VAL:c      {:RESULT = new Expresion(c.getType(), "'" + c.getLexema() + "'");:}
+;
+
+//**************************************** Literal
+literal
+    ::= LITERAL:l       {:RESULT = new Expresion(l.getType(), l.getLexema());:}
+;
+
+//**************************************** Valores booleanos
+bool
+    ::= TRUE:b          {:RESULT = new Expresion(b.getType(), b.getLexema());:}
+    |   FALSE:b         {:RESULT = new Expresion(b.getType(), b.getLexema());:}
+;

@@ -1,1 +1,59 @@
-<p>captchas works!</p>
+<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-indicators">
+    <button *ngFor="let captcha of captchas; let i = index" type="button"
+      [attr.data-bs-target]="'#carouselExampleIndicators'" [attr.data-bs-slide-to]="i" [class.active]="i === 0"
+      aria-current="true" [attr.aria-label]="'Slide ' + (i + 1)"></button>
+  </div>
+
+  <div class="carousel-inner">
+    <div *ngFor="let captcha of captchas; let i = index" class="carousel-item" [class.active]="i === 0">
+      <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+        <div class="text-center text-light">
+          <h5>{{ captcha.name }}</h5>
+          <p>ID: {{ captcha.id }}</p>
+          <p>Link: <a [href]="captcha.link" target="_blank" class="text-info">{{ captcha.link }}</a></p>
+          <button class="btn btn-primary" (click)="redirectCaptcha(captcha.id)">Ir al Captcha</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+<div class="container mt-4">
+  <h1 class="text-light">Lista de Captchas</h1>
+  <div *ngFor="let captcha of captchas">
+    <div class="bg-dark text-light p-3 mb-2 rounded">
+      <h3>{{ captcha.name }}</h3>
+      <p>ID: {{ captcha.id }}</p>
+      <p>Link: <a [href]="captcha.link" target="_blank" class="text-info">{{ captcha.link }}</a></p>
+      <button class="btn btn-primary" (click)="redirectCaptcha(captcha.id)">Ir al Captcha</button>
+      <button class="btn btn-secondary ms-2" (click)="showDetails(captcha)">Detalles</button>
+
+      
+      <div *ngIf="selectedCaptcha === captcha" class="details bg-dark text-light p-2 mt-2 rounded">
+        <h5>Detalles:</h5>
+        <p><strong>ID:</strong> {{ captcha.id }}</p>
+        <p><strong>Nombre:</strong> {{ captcha.name }}</p>
+        <p><strong>Link:</strong> <a [href]="captcha.link" target="_blank" class="text-info">{{ captcha.link }}</a></p>
+        <p><strong>Uso:</strong> {{ captcha.use }}</p>
+        <p><strong>Hits:</strong> {{ captcha.hits }}</p>
+        <p><strong>Faults:</strong> {{ captcha.faults }}</p>
+        <p><strong>Última fecha:</strong> {{ captcha.lastDate }}</p>
+        <button class="btn btn-danger" (click)="clearDetails()">Cerrar</button>
+      </div>
+    </div>
+    <hr />
+  </div>
+
+  <p *ngIf="consoleOutput" class="text-light">{{ consoleOutput }}</p>
+</div>

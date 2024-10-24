@@ -1,0 +1,68 @@
+package com.clc.backend.analizadores.sintactico;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.clc.backend.model.Captcha;
+import java_cup.runtime.Symbol;
+
+parser code {:
+
+    private List<Captcha> captchasList = new ArrayList();
+    private Captcha tempCaptcha = new Captcha();
+
+    public List<Captcha> getCaptchas() {
+        return this.captchasList;
+    }
+
+    public void syntax_error(Symbol s) {
+        String ss =  (String) s.value;
+        StringBuilder descripcion = new StringBuilder("Se esperaba: ");
+        expected_token_ids().forEach(x -> descripcion.append(symbl_name_from_id(x)).append(", "));
+        System.out.println(ss);
+    }
+
+:}
+
+terminal            COLON, COMMA, OPEN_BRACE, CLOSE_BRACE, OPEN_BRACKET, CLOSE_BRACKET;
+terminal            CAPTCHAS, ID, NAME, USE, HITS, FAULTS, LAST_DATE;
+terminal String     FECHA, ENTERO, VALUE, LITERAL;
+
+
+non terminal        inicio, captchas, captcha, params, param;
+non terminal String value;
+
+
+inicio
+    ::= OPEN_BRACE CAPTCHAS COLON OPEN_BRACKET captchas CLOSE_BRACKET CLOSE_BRACE
+;
+
+captchas
+    ::= captcha COMMA captchas
+    |   captcha
+;
+
+captcha
+    ::= OPEN_BRACE params CLOSE_BRACE {:
+            captchasList.add(tempCaptcha);
+            tempCaptcha = new Captcha();
+        :}
+;
+
+params
+    ::= params COMMA param
+    |   param
+;
+
+param
+    ::= ID COLON VALUE:v            {:tempCaptcha.setId(v.replaceAll("\"", ""));:}
+    |   NAME COLON value:v          {:tempCaptcha.setName(v.replaceAll("\"", ""));:}
+    |   USE COLON ENTERO:e          {:tempCaptcha.setUse(e.replaceAll("\"", ""));:}
+    |   HITS COLON ENTERO:e         {:tempCaptcha.setHits(e.replaceAll("\"", ""));:}
+    |   FAULTS COLON ENTERO:e       {:tempCaptcha.setFaults(e.replaceAll("\"", ""));:}
+    |   LAST_DATE COLON FECHA:f     {:tempCaptcha.setLastDate(f.replaceAll("\"", ""));:}
+;
+
+value
+    ::= VALUE:v             {:RESULT = v;:}
+    |   LITERAL:v           {:RESULT = v;:}
+;

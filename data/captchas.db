@@ -1,0 +1,28 @@
+{
+    "captchas" : [
+        {
+            "id" : "captcha_matematico_1",
+            "name" : "CaptchaMatematico1",
+            "use" : "1",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-24"
+        },
+        {
+            "id" : "Captcha",
+            "name" : "CaptchaMatematico1",
+            "use" : "1",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-24"
+        },
+        {
+            "id" : "$Holi",
+            "name" : "Captcha1",
+            "use" : "0",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-24"
+        }
+    ]
+}

@@ -56,3 +56,18 @@
   margin-right: 0; 
 }
 
+.console-output-wrapper {
+  margin-top: 20px;
+}
+
+.console-output {
+  width: 100%;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Courier New', monospace;
+  padding: 10px;
+  border: none;
+  resize: none;
+  overflow-y: auto;
+}
+
