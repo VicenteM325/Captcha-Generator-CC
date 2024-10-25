@@ -23,11 +23,15 @@ export class CaptchaService {
 
   // Incrementar hits
   incrementHits(id: string, link: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/hits`, { id, link });
+    const params = new HttpParams()
+      .set('id', id)
+      .set('link', link); 
+    return this.http.post<void>(`${this.baseUrl}/hits`, null, { params });
   }
 
   // Incrementar faults
   incrementFaults(id: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/faults`, { id });
+    const params = new HttpParams().set('id', id); 
+    return this.http.post<void>(`${this.baseUrl}/faults`, null, { params });
   }
 }

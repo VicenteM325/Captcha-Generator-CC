@@ -38,4 +38,43 @@
   ></textarea>
 </div>
 
+<button class="btn btn-primary mt-2" (click)="showVariablesTable()">Mostrar Variables</button>
+
+<!-- Modal o contenedor para la tabla de variables -->
+<div *ngIf="showTable" class="modal fade show d-block" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tabla de Simbolos</h5>
+          <span aria-hidden="true">&times;</span>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Modo</th>
+              <th>Proceso</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let variable of variables">
+              <td>{{ variable.id }}</td>
+              <td>{{ variable.tipo }}</td>
+              <td>{{ variable.mode }}</td>
+              <td>{{ variable.process }}</td>
+              <td>{{ variable.value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeVariablesTable()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer-dark"></div>

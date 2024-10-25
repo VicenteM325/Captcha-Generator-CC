@@ -10,12 +10,14 @@ public class VariableTS {
     private TipoDato tipo;
     private String mode;
     private String process;
+    private Object value;
 
-    public VariableTS(String id, TipoDato tipo, String mode, String process) {
+    public VariableTS(String id, TipoDato tipo, String mode, String process, Object value) {
         this.id = id;
         this.tipo = tipo;
         this.mode = mode;
         this.process = process;
+        this.value = value;
     }
 
     public String getId() {
@@ -49,4 +51,13 @@ public class VariableTS {
     public void setProcess(String process) {
         this.process = process;
     }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+    
 }

@@ -85,13 +85,48 @@ function LETIMPAR_NUM(str) {
     });
     return array.join("");
 }
-
+// Incrementar los faults y redirigir
 function EXIT(idCaptcha) {
-    window.location.href = "http://localhost:8080/GCIC/captcha?accion=faults&id="+idCaptcha;
+    // Realizar una solicitud POST para incrementar los faults
+    fetch(`http://localhost:8080/api/captchas/faults?id=${idCaptcha}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: idCaptcha })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al incrementar faults');
+        }
+        window.location.href = `http://localhost:4200/captchas/`;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('No se pudo incrementar los faults');
+    });
 }
 
+// Incrementar los hits y redirigir
 function REDIRECT(link, idCaptcha) {
-    window.location.href = "http://localhost:8080/GCIC/captcha?accion=hits&id="+idCaptcha + "&link="+link;
+    // Realizar una solicitud POST para incrementar los hits en el backend
+    fetch(`http://localhost:8080/api/captchas/hits?id=${idCaptcha}&link=${encodeURIComponent(link)}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al incrementar los hits');
+        }
+        window.location.href = `http://localhost:4200/captchas/`;
+        window.open(link, '_blank'); 
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('No se pudo incrementar los hits.');
+    });
 }
 
 function updateTableData(){

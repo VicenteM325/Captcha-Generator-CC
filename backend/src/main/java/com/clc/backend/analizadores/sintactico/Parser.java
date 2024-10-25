@@ -2828,7 +2828,7 @@ currentProcess = p.getLexema() + ++countOnLoad;
             if (onLoad == null) {
                 onLoad = new Process(p.getLexema() + countOnLoad++, instructionList);
             } else {
-                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "Hay ma de un proceso ON_LOAD", "Deje solo un metodo ON_LOAD en el proceso"));
+                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "Hay mas de un proceso ON_LOAD", "Deje solo un metodo ON_LOAD en el proceso"));
             }
             instructionList = new ArrayList();
             variableList = new ArrayList();
@@ -3058,7 +3058,7 @@ currentProcess = p.getLexema();
                 if (errores.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
-                        variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess));
+                        variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), true, varsToAssign, a.getText()));
                 } else {
@@ -3091,7 +3091,7 @@ currentProcess = p.getLexema();
                 if (errores.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
-                        variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess));
+                        variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), false, varsToAssign, a.getText()));
                 } else {
@@ -3120,7 +3120,7 @@ currentProcess = p.getLexema();
         if (errores.isEmpty()) {
             varsToAssign.forEach(v -> {
                 variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess));
+                variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, null));
             });
             instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
         } else {
@@ -3145,7 +3145,7 @@ currentProcess = p.getLexema();
         if (errores.isEmpty()) {
             varsToAssign.forEach(v -> {
                 variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess));
+                variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, null));
             });
             instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
         } else {
@@ -3175,6 +3175,10 @@ currentProcess = p.getLexema();
                 String error = assignValidator.validate(variableList, v, a);
 
                 if (error.isEmpty()) {
+                    variableListGlobal.stream()
+                        .filter(var -> var.getId().equals(v))
+                        .findFirst()
+                        .ifPresent(var -> var.setValue(a.getText()));
                     instructionList.add(new Assignment(v, a.getText()));
                 } else {
                     errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignacion"));

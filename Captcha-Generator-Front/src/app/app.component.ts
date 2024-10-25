@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
-  title = 'Captcha Generator Front';
+  title = 'Captcha Generator CC';
   menuOption: string = '';
   onOption(menuOption: string) {
     this.menuOption = menuOption;

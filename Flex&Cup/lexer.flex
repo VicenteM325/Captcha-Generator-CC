@@ -84,7 +84,7 @@ WH_VAL = {ENTERO}("%")
 IDPARAM = [_$-][\w$-]*
 NAMEPARAM = [:letter:][\w $-]*
 
-PROCESS_NAME = "PROCESS_"[\w]*
+PROCESS_NAME = "FUNCTION_"[\w]*
 IDVAR = [:letter:][\w]*
 
 %state TAG

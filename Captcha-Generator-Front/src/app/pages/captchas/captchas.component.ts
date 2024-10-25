@@ -45,31 +45,36 @@ export class CaptchasComponent implements OnInit {
     );
   }
 
-  // Incrementar hits
-  incrementHits(id: string, link: string): void {
-    this.captchaService.incrementHits(id, link).subscribe(
-      () => {
-        this.consoleOutput = 'Hits incrementados correctamente.';
-      },
-      (error) => {
-        console.error('Error al incrementar hits:', error);
-        this.consoleOutput = 'Error al incrementar hits.';
+  // Incrementar hits y redirigir al enlace proporcionado
+incrementHits(id: string, link: string): void {
+  this.captchaService.incrementHits(id, link).subscribe(
+    (response: any) => {
+      this.consoleOutput = 'Hits incrementados correctamente.';
+      if (response.link) {
+        window.open(response.link, '_blank'); 
       }
-    );
-  }
+      this.loadCaptchas(); 
+    },
+    (error) => {
+      console.error('Error al incrementar hits:', error);
+      this.consoleOutput = 'Error al incrementar hits.';
+    }
+  );
+}
 
-  // Incrementar faults
-  incrementFaults(id: string): void {
-    this.captchaService.incrementFaults(id).subscribe(
-      () => {
-        this.consoleOutput = 'Faults incrementados correctamente.';
-      },
-      (error) => {
-        console.error('Error al incrementar faults:', error);
-        this.consoleOutput = 'Error al incrementar faults.';
-      }
-    );
-  }
+// Incrementar faults
+incrementFaults(id: string): void {
+  this.captchaService.incrementFaults(id).subscribe(
+    () => {
+      this.consoleOutput = 'Faults incrementados correctamente.';
+      this.loadCaptchas();
+    },
+    (error) => {
+      console.error('Error al incrementar faults:', error);
+      this.consoleOutput = 'Error al incrementar faults.';
+    }
+  );
+}
 
   // Mostrar detalles del captcha
   showDetails(captcha: Captcha): void {

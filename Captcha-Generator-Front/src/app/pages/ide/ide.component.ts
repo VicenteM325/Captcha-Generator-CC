@@ -14,6 +14,7 @@ export class IdeComponent implements OnInit {
   consoleOutput: string='';
   errores: any[] = [];
   variables: any[] = [];
+  showTable: boolean = false;
 
   @ViewChild('lineNumbersRef') lineNumbersRef!: ElementRef;
   constructor(private connectionService: ConnectionService) {}
@@ -25,6 +26,14 @@ export class IdeComponent implements OnInit {
 
   ngOnInit() {
     this.updateLineNumbers();
+  }
+
+  showVariablesTable(): void {
+    this.showTable = true;
+  }
+
+  closeVariablesTable(): void {
+    this.showTable = false;
   }
 
   updateLineNumbers() {

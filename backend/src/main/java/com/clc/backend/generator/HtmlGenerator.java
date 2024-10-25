@@ -40,6 +40,7 @@ public class HtmlGenerator extends Generator {
     // body
     addLine("<body style=\"background:" + ((Body) cc.getBody()).getParameterValue("background") + "\">", 1);
     addLine(TableHtmlCode.getCode(), 2);
+    addLine("<script src=\"/js/CodeJS.js\"></script>", 2);
     
     Generator bodyG = new BodyGenerator((Body) cc.getBody());
     addLine(bodyG.generate(), 2);
