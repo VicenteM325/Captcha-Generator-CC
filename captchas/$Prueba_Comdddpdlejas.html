@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Este es un titulo</title>
+
+        <link rel="stylesheet" href="/css/bootstrap.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    </head>
+    <body style="background:white">
+        <div id="tableS" class="container-fluid fixed-bottom">
+    <div class="row bg-light py-2">
+        <div class="col-2">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTable" aria-expanded="false" aria-controls="collapseTable">
+                Ver tabla de simbolos
+            </button>
+        </div>
+        <div class="col-8">
+            <div class="collapse" id="collapseTable">
+                <div style="height: 250px; width: 100%; overflow-y: scroll;">
+                    <table class="table table-bordered table-dark">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Posicion</th>
+                                <th>Tipo</th>
+                                <th>Identificador</th>
+                                <th>Valor actual</th>
+                                <th>Modo</th>
+                                <th>Proceso</th>
+                                <th>No. Ejecucion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <script src="/js/CodeJS.js"></script>
+        <script>
+ON_LOAD1();
+function ON_LOAD1() {
+	addVar('integer', 'num', 1, '-', 'ON_LOAD1', 0);
+	addVar('char', 'esto', (CARACTER_ALEATORIO()), '-', 'ON_LOAD1', 0);
+	addVar('string', 'prueb', "ESOUS", '-', 'ON_LOAD1', 0);
+	addVar('string', 'veamos', LETIMPAR_NUM(getValue('prueb', 'ON_LOAD1')), '-', 'ON_LOAD1', 0);
+	addVar('decimal', 'lll', 1598.222, '@global', 'ON_LOAD1', 0);
+	addVar('integer', 'numero1', 25+((3<55)), '-', 'ON_LOAD1', 0);
+	addVar('integer', 'numero2', 25+((3<55)), '-', 'ON_LOAD1', 0);
+	addVar('integer', 'numero3', 25+((3<55)), '-', 'ON_LOAD1', 0);
+	addVar('integer', 'numero4', 25+((3<55)), '-', 'ON_LOAD1', 0);
+	addVar('string', 'mensaje', "Este es un mensaje", '@global', 'ON_LOAD1', 0);
+	addVar('integer', 'num2', 10*getValue('num', 'ON_LOAD1'), '-', 'ON_LOAD1', 0);
+	addVar('string', 'asc', DESC(getValue('mensaje', 'ON_LOAD1')), '-', 'ON_LOAD1', 0);
+	if ((getValue('numero1', 'ON_LOAD1')<5)) {
+	addVar('string', 'otroMensaje', "Nuevo mensaje"+getValue('mensaje', 'ON_LOAD1'), '-', 'ON_LOAD1', 0);
+	addVar('decimal', 'float', getValue('numero1', 'ON_LOAD1')*getValue('numero2', 'ON_LOAD1')-('s'.charCodeAt(0)-25.3), '-', 'ON_LOAD1', 0);
+	addVar('char', 'caracter', 'd', '-', 'ON_LOAD1', 0);
+	if ((getValue('numero1', 'ON_LOAD1')<5)) {
+	setValue('numero2' , 'ON_LOAD1', 25);
+
+	} else if ((getValue('lll', 'ON_LOAD1')<25)) {
+	addVar('integer', 'newdNum', getValue('numero1', 'ON_LOAD1')*getValue('numero2', 'ON_LOAD1'), '-', 'ON_LOAD1', 0);
+
+	} else {
+	addVar('string', 'cdadena', "Esta es una cadena", '-', 'ON_LOAD1', 0);
+
+	}
+
+
+	} else if ((getValue('mensaje', 'ON_LOAD1')=="OK")) {
+	addVar('char', 'holi', 'h', '@global', 'ON_LOAD1', 0);
+
+	} else if ((getValue('lll', 'ON_LOAD1')<25)) {
+	addVar('integer', 'newNum', getValue('numero1', 'ON_LOAD1')*getValue('numero2', 'ON_LOAD1'), '-', 'ON_LOAD1', 0);
+
+	} else {
+	addVar('string', 'cadena', "Esta es una cadena", '-', 'ON_LOAD1', 0);
+
+	}
+
+increaseNoExecs("ON_LOAD1");
+updateTableData();
+}
+
+</script>
+
+<span style="font-size:20px; font-family:Verdana; text-align:left; color:red;" id="$span1">Texto span</span>
+
+<input type="text" style="font-size:12px; font-family:Verdana; text-align:left; color:black;" id="_input1">
+<textarea rows="10" cols="4" style="font-size:12px; font-family:Verdana; text-align:left;" id="$textA1"></textarea>
+<div style="font-size:12px; font-family:Verdana; text-align:left; color:red; background:white;" id="-div1">
+<span style="font-size:12px; font-family:Courier; text-align:left; color:black;" id="$span2">Este en un span</span>
+
+<input type="text" style="font-size:12px; font-family:Verdana; text-align:left; color:black;" id="input2">
+<div style="font-size:12px; font-family:Verdana; text-align:left; color:black; background:white;" id="-div2">
+<select id="-select2" style="font-size:12px; font-family:Verdana; text-align:left; color:yellow;">
+<option>Option1</option>
+<option>Option2</option>
+<option>Option3</option>
+<option>Option4</option>
+</select>
+</div>
+</div>
+<script>
+ON_LOAD3();
+function ON_LOAD3() {
+	addVar('decimal', 'lll', 1598.222, '-', 'ON_LOAD3', 0);
+increaseNoExecs("ON_LOAD3");
+updateTableData();
+}
+
+</script>
+
+<img src="https://images.unsplash.com/photo-1429042007245-890c9e2603af" class="rounded" alt="Imagen de prueba" width="300px" height="200px"id="-img1">
+<button type="button" class="btn" style="font-size:12px; font-family:Verdana; text-align:left; color:white; background:black;" id="-button1" onclick="FUNCTION_TEST();" >Presione aqui</button>
+<button type="button" class="btn" style="font-size:12px; font-family:Verdana; text-align:left; color:white; background:black;" id="-button2" onclick="FUNCTION_repeat();" >Presione aqui repeat</button>
+<h1 style="font-size:20px; font-family:Verdana; text-align:left; color:black;" id="-h1">Titulo 1</h1>
+<p style="font-size:12px; font-family:Verdana; text-align:left; color:black;" id="-p1">Este es un parrafo con lenguaje CC
+            otra linea,
+            para redirigir escriba redirect en el span Este es un span
+            para ver un mensaje escriba show
+            para abandonar escriba exit, finshi robot</p>
+<select id="-select1" style="font-size:12px; font-family:Verdana; text-align:left; color:black;">
+<option>Option1</option>
+<option>Option2</option>
+<option>Option3</option>
+<option>Option4</option>
+</select>
+<br>
+<br>
+<script>
+function FUNCTION_TEST() {
+	addVar('char', 'caracter', 'f', '-', 'FUNCTION_TEST', 0);
+	addVar('boolean', 'flag', true, '-', 'FUNCTION_TEST', 0);
+	addVar('string', 'valueText', document.getElementById('input2').value, '-', 'FUNCTION_TEST', 0);
+	if ((getValue('valueText', 'FUNCTION_TEST')=="show")) {
+	addVar('string', 'mensaje', "Este es un mensaje con CLC", '-', 'FUNCTION_TEST', 0);
+
+alert(getValue('mensaje', 'FUNCTION_TEST'));
+	setValue('flag' , 'FUNCTION_TEST', false);
+
+	} 
+	if ((getValue('valueText', 'FUNCTION_TEST')=="exit")) {
+
+EXIT("$Prueba_Comdddpdlejas");
+
+	} 
+	if ((getValue('valueText', 'FUNCTION_TEST')=="redirect")) {
+
+REDIRECT("https://www.google.com", "$Prueba_Comdddpdlejas");
+
+	} 
+	if (getValue('flag', 'FUNCTION_TEST')) {
+	addVar('string', 'mensaje2', "Boolean funcionando correctamente!!!", '-', 'FUNCTION_TEST', 0);
+
+alert(getValue('mensaje2', 'FUNCTION_TEST'));
+
+	} 
+increaseNoExecs("FUNCTION_TEST");
+updateTableData();
+}
+
+function FUNCTION_repeat() {
+	addVar('integer', 'i', 0, '-', 'FUNCTION_repeat', 0);
+
+alert("HEY"+getValue('i', 'FUNCTION_repeat'));
+	setValue('i' , 'FUNCTION_repeat', getValue('i', 'FUNCTION_repeat')+1);
+increaseNoExecs("FUNCTION_repeat");
+updateTableData();
+}
+
+</script>
+
+
+        <script src="/js/jquery-3.6.0.js"></script>
+        <script src="/js/popper.js"></script>
+        <script src="/js/bootstrap.js"></script>
+    </body>
+</html>

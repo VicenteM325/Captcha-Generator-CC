@@ -1,0 +1,148 @@
+{
+    "captchas" : [
+        {
+            "id" : "$Prueba_Comddpdlejas",
+            "name" : "Captcha1",
+            "use" : "4",
+            "hits" : "0",
+            "faults" : "2",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Comddpdlejdas",
+            "name" : "Captcha1",
+            "use" : "1",
+            "hits" : "1",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Comdddpdlejas",
+            "name" : "Captcha1",
+            "use" : "1",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Complejas10",
+            "name" : "Captcha1",
+            "use" : "2",
+            "hits" : "1",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Codmddpdlejas",
+            "name" : "Captcha1",
+            "use" : "2",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Comddddpdlejas",
+            "name" : "Captcha1",
+            "use" : "1",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Comdccdpdlejas",
+            "name" : "Captcha1",
+            "use" : "2",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Cosddpdlejas",
+            "name" : "Captcha1",
+            "use" : "3",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_sComddpdlejas",
+            "name" : "Captcha1",
+            "use" : "5",
+            "hits" : "0",
+            "faults" : "1",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$arueba_Comddpdlejas",
+            "name" : "Captcha1",
+            "use" : "4",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_dComddpdlejas",
+            "name" : "Captcha1",
+            "use" : "5",
+            "hits" : "1",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Codmpleja",
+            "name" : "Captcha1",
+            "use" : "3",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Pruedba_Comddpdlejas",
+            "name" : "Captcha1",
+            "use" : "5",
+            "hits" : "1",
+            "faults" : "2",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Cosmddpdlejas",
+            "name" : "Captcha1",
+            "use" : "0",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Cosmddpdlejass",
+            "name" : "Captcha1",
+            "use" : "0",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Cosmddpdsslejass",
+            "name" : "Captcha1",
+            "use" : "0",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Cosmfddpdsslejass",
+            "name" : "Captcha1",
+            "use" : "0",
+            "hits" : "0",
+            "faults" : "0",
+            "lastDate" : "2024-10-28"
+        },
+        {
+            "id" : "$Prueba_Comddpddlejas",
+            "name" : "Captcha1",
+            "use" : "1",
+            "hits" : "0",
+            "faults" : "1",
+            "lastDate" : "2024-10-28"
+        }
+    ]
+}

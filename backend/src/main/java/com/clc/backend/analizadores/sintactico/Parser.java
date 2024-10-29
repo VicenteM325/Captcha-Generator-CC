@@ -2867,7 +2867,7 @@ currentProcess = p.getLexema();
                 }
             }
             if (exists) {
-                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "El proceso con el nombre especificado ya existe", "Cambie el nombre del proceso"));
+                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "La funcion con el nombre especificado ya existe", "Cambie el nombre de la funcion"));
             } else {
                 processList.add(new Process(p.getLexema(), instructionList));
             }

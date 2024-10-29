@@ -1,0 +1,41 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container-fluid.fixed-bottom {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px 8px 0 0;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.table {
+    margin-bottom: 0;
+}
+
+.table thead {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e3f2fd;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
