@@ -754,7 +754,7 @@ process
                 }
             }
             if (exists) {
-                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "El proceso con el nombre especificado ya existe", "Cambie el nombre del proceso"));
+                errores.add(new ErrorAnalisis(p.getLinea(), p.getColumna(), TipoError.SEMANTICO, "La funcion con el nombre especificado ya existe", "Cambie el nombre de la funcion"));
             } else {
                 processList.add(new Process(p.getLexema(), instructionList));
             }
@@ -810,19 +810,20 @@ oneStatement
 fullStatement
     ::= tipo:t GLOBAL_MODE variables ASSIGN assign:a {:
             if (errorVar.isEmpty()) {
+                
                 List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
-
-                if (errores.isEmpty()) {
+ 
+                if (erroresA.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
                         variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), true, varsToAssign, a.getText()));
                 } else {
-                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaración"));
                 errorVar = "";
             }
             varsToAssign = new ArrayList();
@@ -831,17 +832,17 @@ fullStatement
             if (errorVar.isEmpty()) {
                 List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
 
-                if (errores.isEmpty()) {
+                if (erroresA.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
                         variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), false, varsToAssign, a.getText()));
                 } else {
-                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaración"));
                 errorVar = "";
             }
             varsToAssign = new ArrayList();
@@ -849,34 +850,37 @@ fullStatement
 ;
 
 statement
-::= tipo:t GLOBAL_MODE variables {:
-        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+    ::= tipo:t GLOBAL_MODE variables {:
+            // Valida si las variables ya están declaradas
+            List<String> erroresA = varValidator.validate(variableList, varsToAssign);
 
-        if (errores.isEmpty()) {
-            varsToAssign.forEach(v -> {
-                variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, null));
-            });
-            instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
-        } else {
-            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
-        }
-        varsToAssign = new ArrayList();
-    :}
-|   tipo:t variables {:
-        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+            if (erroresA.isEmpty()) {
+                varsToAssign.forEach(v -> {
+                    variableList.add(new Variable(v, t.getType(), false));
+                    variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, null));
+                });
+                instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
+            } else {
+                // Agrega los errores detectados a la lista global de errores
+                erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
+            }
+            varsToAssign = new ArrayList();
+        :}
+    |   tipo:t variables {:
+            // Valida si las variables ya están declaradas
+            List<String> erroresA = varValidator.validate(variableList, varsToAssign);
 
-        if (errores.isEmpty()) {
-            varsToAssign.forEach(v -> {
-                variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, null));
-            });
-            instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
-        } else {
-            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
-        }
-        varsToAssign = new ArrayList();
-    :}
+            if (erroresA.isEmpty()) {
+                varsToAssign.forEach(v -> {
+                    variableList.add(new Variable(v, t.getType(), false));
+                    variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, null));
+                });
+                instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
+            } else {
+                erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
+            }
+            varsToAssign = new ArrayList();
+        :}
 ;
 
 assignment
@@ -891,10 +895,10 @@ assignment
                         .ifPresent(var -> var.setValue(a.getText()));
                     instructionList.add(new Assignment(v, a.getText()));
                 } else {
-                    errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignacion"));
+                    errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignación"));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la asignacion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la asignación"));
                 errorVar = "";
             }
         :}
@@ -1058,7 +1062,7 @@ expr
 
             RESULT = tempExpr;
         :}
-    |   specialFunctions: sf    {:RESULT = sf;:}
+    |   specialFunctions:sf    {:RESULT = sf;:}
 ;
 
 //**************************************** Funciones especiales

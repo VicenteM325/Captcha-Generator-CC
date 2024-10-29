@@ -21,10 +21,11 @@
   </div>
   <div class="file-buttons">
     <input type="file" accept=".cc" (change)="loadFile($event)" id="fileInput" hidden>
-    <button type="button" class="btn btn-primary" (click)="triggerFileInput()">Upload File</button>
-    <button type="button" class="btn btn-secondary" (click)="saveFile()">Save File</button>
-    <button type="button" class="btn btn-success" (click)="generate()">Generate</button>
-    <button type="button" class="btn btn-danger" (click)="clearText()">Clean</button>
+    <button type="button" class="btn btn-upload" (click)="triggerFileInput()">Upload File</button>
+    <button type="button" class="btn btn-save" (click)="saveFile()">Save File</button>
+    <button type="button" class="btn btn-generate" (click)="generate()">Generate</button>
+    <button type="button" class="btn btn-clean" (click)="clearText()">Clean</button>
+    <button class="btn btn-table" *ngIf="showTableButton" (click)="showVariablesTable()">Symbol Table</button>
   </div>
 </div>
 
@@ -38,7 +39,6 @@
   ></textarea>
 </div>
 
-<button class="btn btn-primary mt-2" (click)="showVariablesTable()">Mostrar Variables</button>
 
 <!-- Modal o contenedor para la tabla de variables -->
 <div *ngIf="showTable" class="modal fade show d-block" tabindex="-1" role="dialog">
@@ -71,7 +71,7 @@
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeVariablesTable()">Cerrar</button>
+        <button type="button" class="btn btn-table" (click)="closeVariablesTable()">Cerrar</button>
       </div>
     </div>
   </div>

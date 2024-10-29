@@ -70,4 +70,30 @@
   resize: none;
   overflow-y: auto;
 }
+    .btn-upload {
+        background-color: #4D5159; 
+        color: white;
+    }
+
+    .btn-save {
+        background-color: #2F3540; 
+        color: white;
+    }
+
+    .btn-generate {
+        background-color: #475459; 
+        color: white;
+    }
+
+    .btn-clean {
+        background-color: #730202; 
+        color: white;
+    }
+
+    .btn-table {
+      background-color: #3B403F; 
+      color: white;
+  }
+
+
 

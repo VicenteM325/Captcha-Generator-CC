@@ -38,7 +38,13 @@
                     <artifactId>java-cup-runtime</artifactId>
                     <version>11b-20160615-3</version>
                 </dependency>
-        </dependencies>
+	 <dependency>
+	  <groupId>org.graalvm</groupId>
+	  <artifactId>graal-sdk</artifactId>
+	  <version>1.0.0-rc7</version>
+	  <type>jar</type>
+	 </dependency>
+	</dependencies>
         <build>
             <plugins>
                 <plugin>

@@ -15,6 +15,7 @@ export class IdeComponent implements OnInit {
   errores: any[] = [];
   variables: any[] = [];
   showTable: boolean = false;
+  showTableButton: boolean=false;
 
   @ViewChild('lineNumbersRef') lineNumbersRef!: ElementRef;
   constructor(private connectionService: ConnectionService) {}
@@ -83,6 +84,8 @@ export class IdeComponent implements OnInit {
     this.cursorLine = 1;
     this.cursorColumn = 1;
     this.updateLineNumbers();
+    this.consoleOutput = '';
+    this.showTableButton=false;
   }
   //Metodo para analizar el contenido del IDE
   generate(): void { 
@@ -97,6 +100,7 @@ export class IdeComponent implements OnInit {
             `Línea: ${error.linea}, Columna: ${error.columna}\n` +
             `Solución: ${error.solucion}\n`
           ).join('\n--------------------\n');
+          this.showTableButton=false;
         } else {
           
           this.variables = response.vars ?? [];
@@ -109,6 +113,7 @@ export class IdeComponent implements OnInit {
                //                    `ID: ${variable.id}, Tipo: ${variable.tipo}, Modo: ${variable.mode}`
                  //                ).join('\n');
               this.consoleOutput = 'Captcha creado exitosamente';
+              this.showTableButton=true;
           } 
         }
         console.log('Respuesta del backend: ', response);

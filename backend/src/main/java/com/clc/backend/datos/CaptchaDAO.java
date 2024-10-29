@@ -26,10 +26,10 @@ public class CaptchaDAO {
         createDirectory(PATH_FORMS);
         saveFile(PATH_FORMS + "/captchas.db" , storageG.generate());
     }
-
-    public List<Captcha> getObject() {
-        StringReader text = new StringReader(readFile(PATH_FORMS + "/captchas.db"));
-        return analyzer.analyzeData(text);
+     
+  public List<Captcha> getObject() {
+       StringReader text = new StringReader(readFile(PATH_FORMS + "/captchas.db"));
+      return analyzer.analyzeData(text);
     }
     
     public boolean exists() {

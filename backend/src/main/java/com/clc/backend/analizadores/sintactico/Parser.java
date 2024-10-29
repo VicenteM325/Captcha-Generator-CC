@@ -3053,19 +3053,20 @@ currentProcess = p.getLexema();
 		Expresion a = (Expresion)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
             if (errorVar.isEmpty()) {
+                
                 List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
-
-                if (errores.isEmpty()) {
+ 
+                if (erroresA.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
                         variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), true, varsToAssign, a.getText()));
                 } else {
-                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaración"));
                 errorVar = "";
             }
             varsToAssign = new ArrayList();
@@ -3088,17 +3089,17 @@ currentProcess = p.getLexema();
             if (errorVar.isEmpty()) {
                 List<String> erroresA = assignValidator.validate(variableList, varsToAssign, t.getType(), a);
 
-                if (errores.isEmpty()) {
+                if (erroresA.isEmpty()) {
                     varsToAssign.forEach(v -> {
                         variableList.add(new Variable(v, t.getType(), true));
                         variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, a.getText()));
                     });
                     instructionList.add(new FullStatement(t.getType(), false, varsToAssign, a.getText()));
                 } else {
-                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
+                    erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaracion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la declaración"));
                 errorVar = "";
             }
             varsToAssign = new ArrayList();
@@ -3115,19 +3116,21 @@ currentProcess = p.getLexema();
 		int tright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		TypeToken t = (TypeToken)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
 		
-        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+            // Valida si las variables ya están declaradas
+            List<String> erroresA = varValidator.validate(variableList, varsToAssign);
 
-        if (errores.isEmpty()) {
-            varsToAssign.forEach(v -> {
-                variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, null));
-            });
-            instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
-        } else {
-            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
-        }
-        varsToAssign = new ArrayList();
-    
+            if (erroresA.isEmpty()) {
+                varsToAssign.forEach(v -> {
+                    variableList.add(new Variable(v, t.getType(), false));
+                    variableListGlobal.add(new VariableTS(v, t.getType(), "@global", currentProcess, null));
+                });
+                instructionList.add(new SimpleStatement(t.getType(), true, varsToAssign));
+            } else {
+                // Agrega los errores detectados a la lista global de errores
+                erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
+            }
+            varsToAssign = new ArrayList();
+        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("statement",63, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3140,19 +3143,20 @@ currentProcess = p.getLexema();
 		int tright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		TypeToken t = (TypeToken)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-        List<String> erroresA = varValidator.validate(variableList, varsToAssign);
+            // Valida si las variables ya están declaradas
+            List<String> erroresA = varValidator.validate(variableList, varsToAssign);
 
-        if (errores.isEmpty()) {
-            varsToAssign.forEach(v -> {
-                variableList.add(new Variable(v, t.getType(), false));
-                variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, null));
-            });
-            instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
-        } else {
-            erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaracion")));
-        }
-        varsToAssign = new ArrayList();
-    
+            if (erroresA.isEmpty()) {
+                varsToAssign.forEach(v -> {
+                    variableList.add(new Variable(v, t.getType(), false));
+                    variableListGlobal.add(new VariableTS(v, t.getType(), "-", currentProcess, null));
+                });
+                instructionList.add(new SimpleStatement(t.getType(), false, varsToAssign));
+            } else {
+                erroresA.forEach(e -> errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, e, "Verifique la declaración")));
+            }
+            varsToAssign = new ArrayList();
+        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("statement",63, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3181,10 +3185,10 @@ currentProcess = p.getLexema();
                         .ifPresent(var -> var.setValue(a.getText()));
                     instructionList.add(new Assignment(v, a.getText()));
                 } else {
-                    errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignacion"));
+                    errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, error, "Verifique la asignación"));
                 }
             } else {
-                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la asignacion"));
+                errores.add(new ErrorAnalisis(t.getLinea(), t.getColumna(), TipoError.SEMANTICO, errorVar, "Verifique la asignación"));
                 errorVar = "";
             }
         
